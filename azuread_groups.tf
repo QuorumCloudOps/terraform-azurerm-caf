@@ -7,9 +7,11 @@ module "azuread_groups" {
   source   = "./modules/azuread/groups"
   for_each = local.azuread.azuread_groups
 
+  client_config              = local.client_config
   global_settings = local.global_settings
   azuread_groups  = each.value
   tenant_id       = local.client_config.tenant_id
+  azuread_service_principals = local.combined_objects_azuread_service_principals[try(each.value.lz_key, local.client_config.landingzone_key)]
 }
 
 output "azuread_groups" {

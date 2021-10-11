@@ -21,3 +21,9 @@ output "rbac_id" {
   value       = azuread_group.group.id
 
 }
+
+output "owners" {
+  description = "This attribute is used to set the role assignment."
+  value       = azuread_group.group.id
+
+}
