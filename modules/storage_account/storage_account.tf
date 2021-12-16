@@ -33,6 +33,7 @@ resource "azurerm_storage_account" "stg" {
   nfsv3_enabled            = try(var.storage_account.nfsv3_enabled, false)
   large_file_share_enabled = try(var.storage_account.large_file_share_enabled, null)
   tags                     = merge(var.base_tags, local.tags)
+  
 
 
   dynamic "custom_domain" {
@@ -159,7 +160,7 @@ resource "azurerm_storage_account" "stg" {
       default_action = try(var.storage_account.network.default_action, "Deny")
       ip_rules       = try(var.storage_account.network.ip_rules, [])
       virtual_network_subnet_ids = try(var.storage_account.network.subnets, null) == null ? null : [
-        for key, value in var.storage_account.network.subnets : try(var.vnets[var.client_config.landingzone_key][value.vnet_key].subnets[value.subnet_key].id, var.vnets[value.lz_key][value.vnet_key].subnets[value.subnet_key].id)
+        for key, value in var.storage_account.network.subnets : try(var.vnets[var.client_config.landingzone_key][value.vnet_key].subnets[value.subnet_key].id, try(var.vnets[value.lz_key][value.vnet_key].subnets[value.subnet_key].id, value.remote_subnet_id))
       ]
     }
   }
@@ -193,6 +194,12 @@ resource "azurerm_storage_account" "stg" {
       publish_microsoft_endpoints = try(var.storage_account.routing.publish_microsoft_endpoints, false)
       choice                      = try(var.storage_account.routing.choice, "MicrosoftRouting")
     }
+  }
+
+  lifecycle {
+    ignore_changes = [
+      location, resource_group_name
+    ]
   }
 }
 
@@ -230,4 +237,11 @@ module "file_share" {
   settings             = each.value
   recovery_vault       = local.recovery_vault
   resource_group_name  = var.resource_group_name
+}
+
+module "management_policy" {
+  source             = "./management_policy"
+  for_each           = try(var.storage_account.management_policies, {})
+  storage_account_id = azurerm_storage_account.stg.id
+  settings           = try(var.storage_account.management_policies, {})
 }
