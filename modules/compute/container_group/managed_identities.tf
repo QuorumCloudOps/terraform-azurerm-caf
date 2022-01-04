@@ -17,5 +17,5 @@ locals {
     ]
   ])
 
-  managed_identities = concat(local.managed_local_identities, local.managed_remote_identities)
+  managed_identities = length(concat(local.managed_local_identities, local.managed_remote_identities)) != 0 ? concat(local.managed_local_identities, local.managed_remote_identities) : null
 }
