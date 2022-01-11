@@ -12,7 +12,7 @@ locals {
     diagnostics_destinations = try(var.diagnostics.diagnostics_destinations, {})
     storage_accounts         = merge(try(var.diagnostics.storage_accounts, {}), module.diagnostic_storage_accounts)
     log_analytics            = merge(try(var.diagnostics.log_analytics, {}), module.diagnostic_log_analytics)
-    remote_la                = try(local.combined_objects_log_analytics,null)        
+    remote_la                = local.combined_objects_log_analytics
     event_hub_namespaces     = merge(try(var.diagnostics.event_hub_namespaces, {}), module.diagnostic_event_hub_namespaces)
   }
 }
