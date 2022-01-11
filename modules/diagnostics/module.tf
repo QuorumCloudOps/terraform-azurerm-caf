@@ -18,7 +18,7 @@ resource "azurerm_monitor_diagnostic_setting" "diagnostics" {
   log_analytics_workspace_id     = each.value.destination_type == "log_analytics" ? coalesce(
 try(var.diagnostics.diagnostics_destinations.log_analytics[each.value.destination_key].log_analytics_resource_id,null),
 try(var.diagnostics.log_analytics[var.diagnostics.diagnostics_destinations.log_analytics[each.value.destination_key].log_analytics_key].id,null),
-try(remote_la[var.diagnostics.diagnostics_destinations.log_analytics[each.value.destination_key].lz_key][var.diagnostics.diagnostics_destinations.log_analytics[each.value.destination_key].log_analytics_key].id,null)
+try(var.diagnostics.remote_la[var.diagnostics.diagnostics_destinations.log_analytics[each.value.destination_key].lz_key][var.diagnostics.diagnostics_destinations.log_analytics[each.value.destination_key].log_analytics_key].id,null)
 ) : null
   #try(var.diagnostics.diagnostics_destinations.log_analytics[each.value.destination_key].log_analytics_resource_id, var.diagnostics.log_analytics[var.diagnostics.diagnostics_destinations.log_analytics[each.value.destination_key].log_analytics_key].id) : null
   log_analytics_destination_type = each.value.destination_type == "log_analytics" ? lookup(var.diagnostics.diagnostics_definition[each.value.definition_key], "log_analytics_destination_type", null) : null
