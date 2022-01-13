@@ -39,7 +39,7 @@ resource "azurerm_virtual_machine_extension" "monitoring" {
 data "external" "monitoring_workspace_key" {
   for_each = var.extension_name == "microsoft_enterprise_cloud_monitoring" ? toset(["enabled"]) : toset([])
 
-  program = try(var.settings.diagnostics.log_analytics[var.extension.diagnostic_log_analytics_key].name, null) != null ? [
+  program = can(var.settings.diagnostics.log_analytics[var.extension.diagnostic_log_analytics_key].namel) != false ? [
     "bash", "-c",
     format(
       "az monitor log-analytics workspace get-shared-keys --workspace-name '%s' --resource-group '%s' --subscription '%s' --query '{primarySharedKey: primarySharedKey }' -o json",
