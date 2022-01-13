@@ -16,14 +16,14 @@ resource "azurerm_virtual_machine_extension" "monitoring" {
   )
   protected_settings = jsonencode(
     {
-      "workspaceKey" : data.external.monitoring_TEST_workspace_key["enabled"].result.primarySharedKey
+      "workspaceKey" : data.external.monitoring_workspace_key["enabled"].result.primarySharedKey
     }
   )
 
 }
 
 
-data "external" "monitoring_test_workspace_key" {
+data "external" "monitoring_workspace_key" {
   for_each = var.extension_name == "microsoft_enterprise_cloud_monitoring" ? toset(["enabled"]) : toset([])
 
   program = can(var.settings.diagnostics.log_analytics[var.extension.diagnostic_log_analytics_key].name) != false ? [
