@@ -16,7 +16,7 @@ resource "azurerm_virtual_machine_extension" "monitoring" {
   )
   protected_settings = jsonencode(
     {
-      "workspaceKey" : try(data.external.monitoring_workspace_key["enabled"].result.primarySharedKey,data.external.monitoring_remote_workspace_key["enabled"].result.primarySharedKey)
+      "workspaceKey" : data.external.monitoring_workspace_key["enabled"].result.primarySharedKey
     }
   )
 
@@ -38,7 +38,8 @@ resource "azurerm_virtual_machine_extension" "monitoring" {
 
 data "external" "monitoring_workspace_key" {
   for_each = var.extension_name == "microsoft_enterprise_cloud_monitoring" ? toset(["enabled"]) : toset([])
-  program = [
+
+  program = try(var.settings.diagnostics.log_analytics[var.extension.diagnostic_log_analytics_key].name, null) != null ? [
     "bash", "-c",
     format(
       "az monitor log-analytics workspace get-shared-keys --workspace-name '%s' --resource-group '%s' --subscription '%s' --query '{primarySharedKey: primarySharedKey }' -o json",
@@ -46,12 +47,7 @@ data "external" "monitoring_workspace_key" {
       var.settings.diagnostics.log_analytics[var.extension.diagnostic_log_analytics_key].resource_group_name,
       substr(var.settings.diagnostics.log_analytics[var.extension.diagnostic_log_analytics_key].id, 15, 36)
     )
-  ]
-}
-
-data "external" "monitoring_remote_workspace_key" {
-  for_each = var.extension_name == "microsoft_enterprise_cloud_monitoring" ? toset(["enabled"]) : toset([])
-  program = [
+  ] : [
     "bash", "-c",
     format(
       "az monitor log-analytics workspace get-shared-keys --workspace-name '%s' --resource-group '%s' --subscription '%s' --query '{primarySharedKey: primarySharedKey }' -o json",
@@ -61,3 +57,4 @@ data "external" "monitoring_remote_workspace_key" {
     )
   ]
 }
+
