@@ -11,7 +11,7 @@ resource "azurerm_virtual_machine_extension" "monitoring" {
 
   settings = jsonencode(
     {
-      "workspaceId" : try(var.settings.diagnostics.log_analytics[var.extension.diagnostic_log_analytics_key].workspace_id, var.settings.diagnostics.diagnostics_destinations.log_analytics[var.extension.diagnostic_log_analytics_key].log_analytics_workspace_id)
+      "workspaceId" : var.settings.diagnostics.diagnostics_destinations.log_analytics[var.extension.diagnostic_log_analytics_key].log_analytics_workspace_id
     }
   )
   protected_settings = jsonencode(
