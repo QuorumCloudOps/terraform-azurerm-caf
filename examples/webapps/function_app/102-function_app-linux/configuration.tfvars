@@ -10,10 +10,6 @@ resource_groups = {
     name   = "funapp-private"
     region = "region1"
   }
-  spoke = {
-    name   = "spoke"
-    region = "region1"
-  }
 }
 
 

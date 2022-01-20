@@ -120,6 +120,16 @@ variable "subscriptions" {
   default     = {}
 }
 
+variable "connectivity_subscription_id" {
+  description = "Connectivity subscription id"
+  default     = null
+}
+
+variable "connectivity_tenant_id" {
+  description = "Connectivity tenant id"
+  default     = null
+}
+
 variable "subscription_billing_role_assignments" {
   description = "Configuration object - subscription billing roleassignments."
   default     = {}
@@ -211,6 +221,11 @@ variable "logic_app" {
 ## Databases variables
 variable "database" {
   description = "Configuration object - databases resources"
+  default     = {}
+}
+
+variable "messaging" {
+  description = "Configuration object - messaging resources"
   default     = {}
 }
 
@@ -359,6 +374,17 @@ variable "cognitive_services" {
   description = "Configuration object - Cognitive Service Resource "
   default     = {}
 }
-variable "consumption_budgets" {
+variable "consumption_budgets" {}
+
+variable "communication" {
+  description = "Configuration object - communication resources"
+  default     = {}
+}
+
+variable "identity" {
+  description = "Configuration object - identity resources"
+  default     = {}
+}
+variable "apim" {
   default = {}
 }

@@ -18,7 +18,7 @@ resource "azurerm_lb" "lb" {
     for_each = try(var.settings.frontend_ip_configurations, {})
     content {
       name                          = frontend_ip_configuration.value.name
-      subnet_id                     = try(var.vnets[try(frontend_ip_configuration.value.lz_key, var.client_config.landingzone_key)][frontend_ip_configuration.value.vnet_key].subnets[frontend_ip_configuration.value.subnet_key].id, null)
+      subnet_id                     = try(var.vnets[try(frontend_ip_configuration.value.lz_key, var.client_config.landingzone_key)][frontend_ip_configuration.value.vnet_key].subnets[frontend_ip_configuration.value.subnet_key].id, frontend_ip_configuration.value.subnet_id, null)
       private_ip_address            = try(frontend_ip_configuration.value.private_ip_address, null)
       private_ip_address_allocation = try(frontend_ip_configuration.value.private_ip_address_allocation, null) #Possible values as Dynamic and Static.
       private_ip_address_version    = try(frontend_ip_configuration.value.private_ip_address_version, null)    #Possible values are IPv4 or IPv6.
@@ -42,7 +42,7 @@ resource "azurerm_lb_backend_address_pool_address" "backend_address_pool_address
 
   name                    = each.value.backend_address_pool_address_name
   backend_address_pool_id = azurerm_lb_backend_address_pool.backend_address_pool.0.id
-  virtual_network_id      = var.vnets[var.client_config.landingzone_key][each.value.vnet_key].id
+  virtual_network_id      = try(var.vnets[var.client_config.landingzone_key][each.value.vnet_key].id, each.value.virtual_network_id)
   ip_address              = each.value.ip_address
 }
 
@@ -74,13 +74,18 @@ resource "azurerm_lb_rule" "lb_rule" {
   frontend_port                  = each.value.frontend_port
   backend_port                   = each.value.backend_port
   frontend_ip_configuration_name = each.value.frontend_ip_configuration_name
-  backend_address_pool_id        = try(azurerm_lb_backend_address_pool.backend_address_pool.0.id, null)
-  probe_id                       = try(azurerm_lb_probe.lb_probe[each.value.probe_id_key].id, null)
-  enable_floating_ip             = try(each.value.enable_floating_ip, null)
-  idle_timeout_in_minutes        = try(each.value.idle_timeout_in_minutes, null)
-  load_distribution              = try(each.value.load_distribution, null)
-  disable_outbound_snat          = try(each.value.disable_outbound_snat, null)
-  enable_tcp_reset               = try(each.value.enable_tcp_reset, null)
+  backend_address_pool_ids = try(flatten([
+    for backend_address_pool in try(azurerm_lb_backend_address_pool.backend_address_pool, []) : [
+      backend_address_pool.id
+    ]
+  ]), null)
+  #try(azurerm_lb_backend_address_pool.backend_address_pool.0.id, null)
+  probe_id                = try(azurerm_lb_probe.lb_probe[each.value.probe_id_key].id, null)
+  enable_floating_ip      = try(each.value.enable_floating_ip, null)
+  idle_timeout_in_minutes = try(each.value.idle_timeout_in_minutes, null)
+  load_distribution       = try(each.value.load_distribution, null)
+  disable_outbound_snat   = try(each.value.disable_outbound_snat, null)
+  enable_tcp_reset        = try(each.value.enable_tcp_reset, null)
 
   depends_on = [
     azurerm_lb_backend_address_pool.backend_address_pool,
