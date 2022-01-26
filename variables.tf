@@ -374,7 +374,6 @@ variable "cognitive_services" {
   description = "Configuration object - Cognitive Service Resource "
   default     = {}
 }
-variable "consumption_budgets" {}
 
 variable "communication" {
   description = "Configuration object - communication resources"
